@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+
+  mongodb:
+    image: mongo
+
+    container_name: edugen-mongodb
+
+    restart: always
+
+    ports:
+      - "27017:27017"
+
+    volumes:
+      - mongo-data:/data/db
+
+  chromadb:
+    image: chromadb/chroma
+
+    container_name: edugen-chromadb
+
+    restart: always
+
+    ports:
+      - "8000:8000"
+
+  backend:
+    build: ./server
+
+    container_name: edugen-backend
+
+    restart: always
+
+    env_file:
+      - .env
+
+    depends_on:
+      - mongodb
+      - chromadb
+
+    ports:
+      - "5000:5000"
+
+volumes:
+  mongo-data:
