@@ -7,13 +7,11 @@ AI-Powered Educational Assistant built using MERN Stack, Gemini AI, MongoDB, OCR
 ## Features
 
 ### Authentication
-
 * Register
 * Login
 * JWT Authentication
 
 ### Document Processing
-
 * PDF Upload
 * Image Upload
 * OCR Text Extraction
