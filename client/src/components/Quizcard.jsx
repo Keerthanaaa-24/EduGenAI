@@ -7,7 +7,6 @@ function QuizCard({
   return (
     <div className="card">
       <h3>{question}</h3>
-
       {options.map(
         (
           option,
