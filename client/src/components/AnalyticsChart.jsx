@@ -6,7 +6,6 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
-
 function AnalyticsChart({
   analytics,
 }) {
