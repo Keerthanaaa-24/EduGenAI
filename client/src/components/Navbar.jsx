@@ -3,7 +3,6 @@ import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
   const { logout } = useAuth();
-
   return (
     <nav className="modern-navbar">
 
