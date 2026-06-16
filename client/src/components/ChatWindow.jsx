@@ -1,7 +1,6 @@
 import {
   useState,
 } from "react";
-
 import {
   askQuestion,
 } from "../services/chatService";
