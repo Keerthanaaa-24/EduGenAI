@@ -6,7 +6,6 @@ function StudyPlanner({
       <h2>
         AI Study Plan
       </h2>
-
       <pre
         style={{
           whiteSpace:
