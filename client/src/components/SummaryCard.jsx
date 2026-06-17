@@ -6,7 +6,6 @@ function SummaryCard({
       <h2>
         AI Summary
       </h2>
-
       <pre
         style={{
           whiteSpace:
