@@ -11,7 +11,6 @@ function UploadDocument() {
       alert("Select a file");
       return;
     }
-
     try {
       setLoading(true);
 
