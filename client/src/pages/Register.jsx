@@ -11,7 +11,6 @@ function Register() {
     email: "",
     password: "",
   });
-
   const handleChange = (e) => {
     setForm({
       ...form,
