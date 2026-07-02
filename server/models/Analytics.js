@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const analyticsSchema =
   new mongoose.Schema(
     {
