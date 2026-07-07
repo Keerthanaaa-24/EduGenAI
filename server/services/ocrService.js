@@ -1,6 +1,5 @@
 const Tesseract =
   require("tesseract.js");
-
 const extractImageText =
   async (imagePath) => {
     try {
