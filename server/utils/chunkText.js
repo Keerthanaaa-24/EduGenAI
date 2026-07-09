@@ -3,7 +3,6 @@ const chunkText = (
   chunkSize = 1000
 ) => {
   const chunks = [];
-
   for (
     let i = 0;
     i < text.length;
