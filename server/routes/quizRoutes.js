@@ -5,9 +5,6 @@ const auth =
 const Document =
   require("../models/Document");
 
-const Analytics =
-  require("../models/Analytics");
-
 const {
   generateQuiz,
 } = require("../services/quizService");
@@ -20,8 +17,10 @@ router.post(
   auth,
   async (req, res) => {
     try {
+
       const {
         documentId,
+        language,
       } = req.body;
 
       const document =
@@ -39,35 +38,23 @@ router.post(
 
       const quiz =
         await generateQuiz(
-          document.extractedText
+          document.extractedText,
+          language || "English"
         );
-
-      await Analytics.findOneAndUpdate(
-        {
-          user:
-            req.user.id,
-        },
-        {
-          $inc: {
-            quizAttempts:
-              1,
-          },
-        },
-        {
-          upsert: true,
-        }
-      );
 
       res.json({
         success: true,
         quiz,
       });
+
     } catch (error) {
+
       res.status(500).json({
         success: false,
         message:
           error.message,
       });
+
     }
   }
 );

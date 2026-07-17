@@ -5,16 +5,20 @@ const MODEL =
 
 const generateStudyPlan =
   async (
+    text,
     subject,
     examDate,
     hoursPerDay,
-    studyMaterial
+    language
   ) => {
 
     const prompt = `
 You are EduGen AI.
 
-Create a professional study planner.
+Generate the study plan ONLY in ${language}.
+
+Study Material:
+${text.substring(0,12000)}
 
 Subject:
 ${subject}
@@ -25,74 +29,59 @@ ${examDate}
 Hours Per Day:
 ${hoursPerDay}
 
-Study Material:
-${studyMaterial.substring(
-  0,
-  15000
-)}
+Create a professional study planner.
 
-Requirements:
-
-Analyse the study material.
-
-Identify:
-- Units
-- Topics
-- Important concepts
-- Difficult concepts
-
-Generate day-wise plan.
-
-Format:
+Format EXACTLY like this.
 
 DAY 1
 
-Topics:
-• Topic 1
-• Topic 2
+Topics
 
-Tasks:
-• Read summary
-• Practice quiz
-• Revise notes
+Task 1
 
-Hours:
-${hoursPerDay}
+Task 2
 
---------------------------------
+Hours
+
+${hoursPerDay} Hours
+
+---------------------
 
 DAY 2
 
-Topics:
-• Topic 3
-• Topic 4
+Topics
 
-Tasks:
-• Complete revision
-• Attempt 15 MCQs
+Task 1
 
-Hours:
-${hoursPerDay}
+Task 2
 
---------------------------------
+Hours
 
-Continue until exam preparation is complete.
+${hoursPerDay} Hours
 
-Also include:
+Continue until the exam.
 
-Important Revision Days
+Also mention:
 
-Mock Test Days
+Daily Revision
 
-Final Revision Plan
+Weekly Revision
 
-Exam Strategy
+Important Topics
+
+Difficult Topics
+
+Final Revision Day
+
+Do not use tables.
+Do not use markdown.
+
+Everything should be aligned neatly.
 `;
 
     const response =
       await client.chat.completions.create({
         model: MODEL,
-
         messages: [
           {
             role: "user",

@@ -64,6 +64,15 @@ app.use(
   "/api/analytics",
   analyticsRoutes
 );
+const quizResultRoutes =
+  require(
+    "./routes/quizResultRoutes"
+  );
+  app.use(
+  "/api/quiz-results",
+  quizResultRoutes
+);
+
 
 app.use(errorHandler);
 

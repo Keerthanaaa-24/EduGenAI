@@ -4,38 +4,39 @@ const MODEL =
   require("../config/model");
 
 const generateQuiz =
-  async (text) => {
+  async (
+    text,
+    language
+  ) => {
 
     const prompt = `
-Generate EXACTLY 15 MCQs from the study material.
+You are EduGen AI.
 
-Return ONLY valid JSON.
+Generate exactly 15 multiple-choice questions ONLY in ${language}.
+
+Instructions:
+
+- Use ONLY ${language}.
+- Questions must come ONLY from the uploaded study material.
+- Each question must have exactly 4 options.
+- Only one option should be correct.
+- Do NOT repeat questions.
+- Cover all major topics.
+- Return ONLY valid JSON.
 
 Format:
 
 [
-  {
-    "question":"Question text",
-    "options":[
-      "Option A",
-      "Option B",
-      "Option C",
-      "Option D"
-    ],
-    "answer":"Option A"
-  }
+{
+"question":"",
+"options":["","","",""],
+"answer":""
+}
 ]
-
-Do NOT add explanations.
-Do NOT add markdown.
-Do NOT add \`\`\`json.
 
 Study Material:
 
-${text.substring(
-  0,
-  10000
-)}
+${text.substring(0,12000)}
 `;
 
     const response =
@@ -49,38 +50,9 @@ ${text.substring(
         ],
       });
 
-    const content =
-      response.choices[0]
-        .message.content;
-
-    try {
-
-      const cleaned =
-        content
-          .replace(
-            /```json/g,
-            ""
-          )
-          .replace(
-            /```/g,
-            ""
-          )
-          .trim();
-
-      return JSON.parse(
-        cleaned
-      );
-
-    } catch (error) {
-
-      console.log(
-        "Quiz Parse Error:",
-        error
-      );
-
-      return [];
-
-    }
+    return response
+      .choices[0]
+      .message.content;
   };
 
 module.exports = {

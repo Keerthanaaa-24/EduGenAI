@@ -5,67 +5,40 @@ const MODEL =
   require("../config/model");
 
 const generateSummary =
-  async (text) => {
+  async (
+    text,
+    language
+  ) => {
 
     const prompt = `
 You are EduGen AI.
 
-Generate detailed revision notes from the study material.
+Generate comprehensive revision notes ONLY in ${language}.
 
-Format:
+Requirements:
 
-# SUBJECT SUMMARY
-
-## UNIT / MODULE NAME
-
-### Important Concepts
-- Point wise explanation
-
-### Important Definitions
-- Definition 1
-- Definition 2
-
-### Important Formulae
-- Formula 1
-- Formula 2
-
-### Important Diagrams
-- Mention diagrams student should practice
-
-### Exam Tips
-- Important areas for exams
-
-### 2 Mark Questions
-1.
-2.
-3.
-4.
-5.
-
-### 16 Mark Questions
-1.
-2.
-3.
-4.
-5.
-
-Instructions:
-
-1. Cover ALL topics found in the material.
-2. Generate long notes (approximately 4–6 pages).
-3. Use headings and subheadings.
-4. Do not skip units.
-5. Make it suitable for university exam preparation.
+• Use ONLY ${language}.
+• Do not mix English unless absolutely necessary.
+• Create approximately 5–6 pages of study notes.
+• Include:
+  - Headings
+  - Sub-headings
+  - Important definitions
+  - Important formulas
+  - Key points
+  - Exam tips
+  - 2-mark questions
+  - 16-mark questions
+  - Revision summary
 
 Study Material:
 
-${text.substring(0, 25000)}
+${text.substring(0, 12000)}
 `;
 
     const response =
       await client.chat.completions.create({
         model: MODEL,
-
         messages: [
           {
             role: "user",
@@ -74,9 +47,7 @@ ${text.substring(0, 25000)}
         ],
       });
 
-    return response
-      .choices[0]
-      .message.content;
+    return response.choices[0].message.content;
   };
 
 module.exports = {

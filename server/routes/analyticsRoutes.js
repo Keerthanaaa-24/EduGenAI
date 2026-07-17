@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 const express = require("express");
+=======
+const express =
+  require("express");
+
+>>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)
 const auth =
   require("../middleware/auth");
 
 const Analytics =
   require("../models/Analytics");
+
+const QuizAttempt =
+  require("../models/QuizAttempt");
 
 const router =
   express.Router();
@@ -12,33 +21,35 @@ router.get(
   "/dashboard",
   auth,
   async (req, res) => {
-    try {
-      let analytics =
-        await Analytics.findOne({
-          user:
-            req.user.id,
-        });
 
-      if (!analytics) {
-        analytics =
-          await Analytics.create({
-            user:
-              req.user.id,
-          });
-      }
+    const analytics =
+      await Analytics.findOne({
+        user:
+          req.user.id,
+      });
 
-      res.json({
-        success: true,
-        analytics,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message:
-          error.message,
-      });
-    }
+    const history =
+      await QuizAttempt.find({
+        user:
+          req.user.id,
+      })
+        .sort({
+          createdAt: -1,
+        })
+        .limit(10);
+
+    res.json({
+      success: true,
+      analytics,
+      history,
+    });
+
   }
 );
 
+<<<<<<< HEAD
 module.exports = router;
+=======
+module.exports =
+  router;
+>>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)

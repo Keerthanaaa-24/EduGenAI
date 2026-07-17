@@ -40,11 +40,6 @@ const analyticsSchema =
         default: 0,
       },
 
-      totalScore: {
-        type: Number,
-        default: 0,
-      },
-
       highestScore: {
         type: Number,
         default: 0,
@@ -55,9 +50,9 @@ const analyticsSchema =
         default: 0,
       },
 
-      studyHours: {
-        type: Number,
-        default: 0,
+      rating: {
+        type: String,
+        default: "Beginner",
       },
 
       progressPercentage: {

@@ -4,8 +4,10 @@ const API =
   "http://localhost:5000/api/summary";
 export const generateSummary =
   async (
-    documentId
+    documentId,
+    language
   ) => {
+
     const token =
       localStorage.getItem(
         "token"
@@ -16,10 +18,12 @@ export const generateSummary =
         `${API}/generate`,
         {
           documentId,
+          language,
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization:
+              `Bearer ${token}`,
           },
         }
       );

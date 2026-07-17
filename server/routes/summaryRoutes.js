@@ -5,15 +5,12 @@ const auth =
 const Document =
   require("../models/Document");
 
-const Summary =
-  require("../models/Summary");
-
-const Analytics =
-  require("../models/Analytics");
-
 const {
   generateSummary,
 } = require("../services/summaryService");
+
+const Analytics =
+  require("../models/Analytics");
 
 const router =
   express.Router();
@@ -23,8 +20,10 @@ router.post(
   auth,
   async (req, res) => {
     try {
-      const { documentId } =
-        req.body;
+      const {
+        documentId,
+        language,
+      } = req.body;
 
       const document =
         await Document.findById(
@@ -41,22 +40,13 @@ router.post(
 
       const summary =
         await generateSummary(
-          document.extractedText
+          document.extractedText,
+          language || "English"
         );
-
-      await Summary.create({
-        user: req.user.id,
-        document:
-          document._id,
-        title:
-          document.fileName,
-        summary,
-      });
 
       await Analytics.findOneAndUpdate(
         {
-          user:
-            req.user.id,
+          user: req.user.id,
         },
         {
           $inc: {
@@ -65,6 +55,7 @@ router.post(
         },
         {
           upsert: true,
+          new: true,
         }
       );
 

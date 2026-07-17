@@ -23,11 +23,13 @@ router.post(
   auth,
   async (req, res) => {
     try {
+
       const {
         subject,
         examDate,
         hoursPerDay,
         documentId,
+        language,
       } = req.body;
 
       const document =
@@ -36,28 +38,35 @@ router.post(
         );
 
       if (!document) {
+
         return res.status(404).json({
           success: false,
           message:
             "Document not found",
         });
+
       }
 
       const plan =
         await generateStudyPlan(
+          document.extractedText,
           subject,
           examDate,
           hoursPerDay,
-          document.extractedText
+          language || "English"
         );
 
       const studyPlan =
         await StudyPlan.create({
           user:
             req.user.id,
+
           subject,
+
           examDate,
+
           hoursPerDay,
+
           plan,
         });
 
@@ -81,12 +90,15 @@ router.post(
         success: true,
         studyPlan,
       });
+
     } catch (error) {
+
       res.status(500).json({
         success: false,
         message:
           error.message,
       });
+
     }
   }
 );
@@ -95,7 +107,9 @@ router.get(
   "/my-plans",
   auth,
   async (req, res) => {
+
     try {
+
       const plans =
         await StudyPlan.find({
           user:
@@ -106,14 +120,23 @@ router.get(
         success: true,
         plans,
       });
+
     } catch (error) {
+
       res.status(500).json({
         success: false,
         message:
           error.message,
       });
+
     }
+
   }
 );
 
+<<<<<<< HEAD
 module.exports = router;
+=======
+module.exports =
+  router;
+>>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)

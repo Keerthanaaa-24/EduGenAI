@@ -3,6 +3,11 @@ import {
   useState,
 } from "react";
 import Navbar from "../components/Navbar";
+<<<<<<< HEAD
+=======
+import LanguageSelector from "../components/LanguageSelector";
+
+>>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)
 import {
   getDocuments,
 } from "../services/documentService";
@@ -20,6 +25,10 @@ function Planner() {
   const [selectedDoc,
     setSelectedDoc] =
     useState("");
+
+  const [language,
+    setLanguage] =
+    useState("English");
 
   const [subject,
     setSubject] =
@@ -62,6 +71,7 @@ function Planner() {
         console.log(error);
 
       }
+
     };
 
   const handleGenerate =
@@ -75,7 +85,7 @@ function Planner() {
       ) {
 
         alert(
-          "Fill all fields"
+          "Fill all fields."
         );
 
         return;
@@ -90,7 +100,8 @@ function Planner() {
             subject,
             examDate,
             hours,
-            selectedDoc
+            selectedDoc,
+            language
           );
 
         setPlan(
@@ -102,7 +113,7 @@ function Planner() {
         alert(
           error.response?.data
             ?.message ||
-            "Planner generation failed"
+            "Planner generation failed."
         );
 
       } finally {
@@ -110,6 +121,7 @@ function Planner() {
         setLoading(false);
 
       }
+
     };
 
   return (
@@ -126,18 +138,19 @@ function Planner() {
 
           <select
             value={selectedDoc}
-            onChange={(e) =>
+            onChange={(e)=>
               setSelectedDoc(
                 e.target.value
               )
             }
           >
+
             <option value="">
               Select Document
             </option>
 
             {documents.map(
-              (doc) => (
+              (doc)=>(
                 <option
                   key={doc._id}
                   value={doc._id}
@@ -146,13 +159,19 @@ function Planner() {
                 </option>
               )
             )}
+
           </select>
+
+          <LanguageSelector
+            language={language}
+            setLanguage={setLanguage}
+          />
 
           <input
             type="text"
             placeholder="Subject"
             value={subject}
-            onChange={(e) =>
+            onChange={(e)=>
               setSubject(
                 e.target.value
               )
@@ -162,7 +181,7 @@ function Planner() {
           <input
             type="date"
             value={examDate}
-            onChange={(e) =>
+            onChange={(e)=>
               setExamDate(
                 e.target.value
               )
@@ -173,7 +192,7 @@ function Planner() {
             type="number"
             placeholder="Hours Per Day"
             value={hours}
-            onChange={(e) =>
+            onChange={(e)=>
               setHours(
                 e.target.value
               )
@@ -181,28 +200,47 @@ function Planner() {
           />
 
           <button
-            onClick={
-              handleGenerate
-            }
+            onClick={handleGenerate}
           >
             {loading
               ? "Generating..."
               : "Generate Plan"}
           </button>
 
-          {plan && (
+        </div>
+
+        {plan && (
+
+          <div
+            className="result-card"
+            style={{
+              marginTop:
+                "30px",
+            }}
+          >
+
+            <h2>
+              📅 Generated Study Plan
+            </h2>
 
             <div
               className="planner-output"
+              style={{
+                maxHeight:
+                  "700px",
+                overflowY:
+                  "auto",
+              }}
             >
               {plan}
             </div>
 
-          )}
+          </div>
 
-        </div>
+        )}
 
       </div>
+
     </>
   );
 }

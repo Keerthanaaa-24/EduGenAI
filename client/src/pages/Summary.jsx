@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import Navbar from "../components/Navbar";
+
+import LanguageSelector from "../components/LanguageSelector";
 
 import {
   getDocuments,
@@ -20,6 +25,10 @@ function Summary() {
     setSelectedDoc] =
     useState("");
 
+  const [language,
+    setLanguage] =
+    useState("English");
+
   const [summary,
     setSummary] =
     useState("");
@@ -34,7 +43,6 @@ function Summary() {
 
   const loadDocuments =
     async () => {
-
       try {
 
         const result =
@@ -57,7 +65,7 @@ function Summary() {
       if (!selectedDoc) {
 
         alert(
-          "Please select a document"
+          "Please select a document."
         );
 
         return;
@@ -69,7 +77,8 @@ function Summary() {
 
         const result =
           await generateSummary(
-            selectedDoc
+            selectedDoc,
+            language
           );
 
         setSummary(
@@ -81,7 +90,7 @@ function Summary() {
         alert(
           error.response?.data
             ?.message ||
-            "Summary generation failed"
+            "Summary generation failed."
         );
 
       } finally {
@@ -104,9 +113,11 @@ function Summary() {
           </h1>
 
           <p>
-            Generate detailed
+            Generate complete
             revision notes from
-            your uploaded PDF.
+            your uploaded PDF in
+            your preferred
+            language.
           </p>
 
           <select
@@ -117,25 +128,28 @@ function Summary() {
               )
             }
           >
-
             <option value="">
               Select Document
             </option>
 
             {documents.map(
               (doc) => (
-
                 <option
                   key={doc._id}
                   value={doc._id}
                 >
                   {doc.fileName}
                 </option>
-
               )
             )}
-
           </select>
+
+          <LanguageSelector
+            language={language}
+            setLanguage={
+              setLanguage
+            }
+          />
 
           <button
             onClick={
@@ -180,6 +194,7 @@ function Summary() {
         )}
 
       </div>
+
     </>
   );
 }

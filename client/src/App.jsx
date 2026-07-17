@@ -3,6 +3,14 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+<<<<<<< HEAD
+=======
+
+import {
+  useAuth,
+} from "./context/AuthContext";
+
+>>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -14,58 +22,130 @@ import Planner from "./pages/Planner";
 import Analytics from "./pages/Analytics";
 
 function App() {
+  const { user } =
+    useAuth();
+
+  const PrivateRoute = ({
+    children,
+  }) => {
+    return user ? (
+      children
+    ) : (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  };
+
   return (
     <Routes>
 
+      {/* PUBLIC ROUTES */}
+
       <Route
         path="/login"
-        element={<Login />}
+        element={
+          user ? (
+            <Navigate
+              to="/dashboard"
+            />
+          ) : (
+            <Login />
+          )
+        }
       />
 
       <Route
         path="/register"
-        element={<Register />}
+        element={
+          user ? (
+            <Navigate
+              to="/dashboard"
+            />
+          ) : (
+            <Register />
+          )
+        }
       />
+
+      {/* PROTECTED ROUTES */}
 
       <Route
         path="/dashboard"
-        element={<Dashboard />}
+        element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        }
       />
 
       <Route
         path="/upload"
-        element={<Upload />}
+        element={
+          <PrivateRoute>
+            <Upload />
+          </PrivateRoute>
+        }
       />
 
       <Route
         path="/chat"
-        element={<Chat />}
+        element={
+          <PrivateRoute>
+            <Chat />
+          </PrivateRoute>
+        }
       />
 
       <Route
         path="/quiz"
-        element={<Quiz />}
+        element={
+          <PrivateRoute>
+            <Quiz />
+          </PrivateRoute>
+        }
       />
 
       <Route
         path="/summary"
-        element={<Summary />}
+        element={
+          <PrivateRoute>
+            <Summary />
+          </PrivateRoute>
+        }
       />
 
       <Route
         path="/planner"
-        element={<Planner />}
+        element={
+          <PrivateRoute>
+            <Planner />
+          </PrivateRoute>
+        }
       />
 
       <Route
         path="/analytics"
-        element={<Analytics />}
+        element={
+          <PrivateRoute>
+            <Analytics />
+          </PrivateRoute>
+        }
       />
+
+      {/* DEFAULT */}
 
       <Route
         path="*"
         element={
-          <Navigate to="/login" />
+          <Navigate
+            to={
+              user
+                ? "/dashboard"
+                : "/login"
+            }
+          />
         }
       />
 

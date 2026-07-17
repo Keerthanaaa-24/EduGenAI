@@ -15,6 +15,10 @@ function Analytics() {
     setAnalytics] =
     useState(null);
 
+  const [history,
+    setHistory] =
+    useState([]);
+
   useEffect(() => {
     loadAnalytics();
   }, []);
@@ -31,6 +35,10 @@ function Analytics() {
           result.analytics
         );
 
+        setHistory(
+          result.history || []
+        );
+
       } catch (error) {
 
         console.log(error);
@@ -39,14 +47,16 @@ function Analytics() {
     };
 
   if (!analytics) {
+
     return (
       <>
         <Navbar />
         <h2>
-          Loading Analytics...
+          Loading...
         </h2>
       </>
     );
+
   }
 
   return (
@@ -84,38 +94,163 @@ function Analytics() {
             </h3>
             <p>
               {
-                analytics.quizAttempts
+                analytics.quizzesCompleted
               }
             </p>
           </div>
 
           <div className="stat-card">
             <h2>
-              📚
+              🎯
             </h2>
             <h3>
-              Summaries
+              Average Score
             </h3>
             <p>
               {
-                analytics.summariesGenerated
+                analytics.averageScore
+              }
+              %
+            </p>
+          </div>
+
+          <div className="stat-card">
+            <h2>
+              🏆
+            </h2>
+            <h3>
+              Highest Score
+            </h3>
+            <p>
+              {
+                analytics.highestScore
+              }
+              %
+            </p>
+          </div>
+
+          <div className="stat-card">
+            <h2>
+              ⭐
+            </h2>
+            <h3>
+              Rating
+            </h3>
+            <p>
+              {
+                analytics.rating
               }
             </p>
           </div>
 
           <div className="stat-card">
             <h2>
-              📅
+              🔥
             </h2>
             <h3>
-              Plans
+              Streak
             </h3>
             <p>
               {
-                analytics.studyPlansGenerated
+                analytics.streakDays
               }
+              {" "}
+              Days
             </p>
           </div>
+
+        </div>
+
+        <div
+          className="activity-card"
+        >
+
+          <h2>
+            📝 Quiz History
+          </h2>
+
+          <table
+            style={{
+              width: "100%",
+              marginTop:
+                "20px",
+            }}
+          >
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Date
+                </th>
+
+                <th>
+                  Score
+                </th>
+
+                <th>
+                  Percentage
+                </th>
+
+                <th>
+                  Grade
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {history.map(
+                (quiz) => (
+
+                  <tr
+                    key={
+                      quiz._id
+                    }
+                  >
+
+                    <td>
+                      {
+                        new Date(
+                          quiz.createdAt
+                        ).toLocaleDateString()
+                      }
+                    </td>
+
+                    <td>
+                      {
+                        quiz.score
+                      }
+                      /
+                      {
+                        quiz.totalQuestions
+                      }
+                    </td>
+
+                    <td>
+                      {
+                        quiz.percentage
+                      }
+                      %
+                    </td>
+
+                    <td>
+                      {
+                        quiz.grade
+                      }
+                    </td>
+
+                  </tr>
+
+                )
+              )}
+
+            </tbody>
+
+          </table>
 
         </div>
 

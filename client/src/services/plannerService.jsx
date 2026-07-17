@@ -7,7 +7,8 @@ export const generatePlan =
     subject,
     examDate,
     hoursPerDay,
-    documentId
+    documentId,
+    language
   ) => {
 
     const token =
@@ -23,6 +24,7 @@ export const generatePlan =
           examDate,
           hoursPerDay,
           documentId,
+          language,
         },
         {
           headers: {

@@ -1,94 +1,137 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { getDocuments } from "../services/documentService";
-import { generateQuiz } from "../services/quizService";
+import {
+  generateQuiz,
+  submitQuizResult,
+} from "../services/quizService";
+import LanguageSelector from "../components/LanguageSelector";
 
 function Quiz() {
-  const [documents, setDocuments] = useState([]);
-  const [selectedDoc, setSelectedDoc] = useState("");
+  const [documents, setDocuments] =
+    useState([]);
 
-  const [questions, setQuestions] = useState([]);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedDoc,
+    setSelectedDoc] =
+    useState("");
 
-  const [selectedAnswer, setSelectedAnswer] = useState("");
-  const [score, setScore] = useState(0);
+  const [questions,
+    setQuestions] =
+    useState([]);
 
-  const [loading, setLoading] = useState(false);
+  const [currentQuestion,
+    setCurrentQuestion] =
+    useState(0);
 
-  const [quizStarted, setQuizStarted] = useState(false);
-  const [quizFinished, setQuizFinished] = useState(false);
+  const [selectedAnswer,
+    setSelectedAnswer] =
+    useState("");
 
-  const [showResult, setShowResult] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
+  const [score,
+    setScore] =
+    useState(0);
+
+  const [loading,
+    setLoading] =
+    useState(false);
+
+  const [quizStarted,
+    setQuizStarted] =
+    useState(false);
+
+  const [quizFinished,
+    setQuizFinished] =
+    useState(false);
+
+    const [language,
+setLanguage] =
+useState("English");
+
+  const [showResult,
+    setShowResult] =
+    useState(false);
+
+  const [isCorrect,
+    setIsCorrect] =
+    useState(false);
 
   useEffect(() => {
     loadDocuments();
   }, []);
 
-  const loadDocuments = async () => {
-    try {
-      const result =
-        await getDocuments();
+  const loadDocuments =
+    async () => {
+      try {
+        const result =
+          await getDocuments();
 
-      setDocuments(
-        result.documents || []
-      );
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleGenerate = async () => {
-    if (!selectedDoc) {
-      alert(
-        "Select a document first"
-      );
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const result =
-        await generateQuiz(
-          selectedDoc
+        setDocuments(
+          result.documents || []
         );
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
-      let quizData =
-        result.quiz;
+  const handleGenerate =
+    async () => {
 
-      if (
-        typeof quizData ===
-        "string"
-      ) {
-        quizData =
-          JSON.parse(
-            quizData
-          );
+      if (!selectedDoc) {
+        alert(
+          "Select a document first"
+        );
+        return;
       }
 
-      setQuestions(
-        quizData
-      );
+      try {
 
-      setCurrentQuestion(0);
-      setScore(0);
+        setLoading(true);
 
-      setSelectedAnswer("");
+        const result =
+          await generateQuiz(
+            selectedDoc
+          );
 
-      setQuizStarted(true);
-      setQuizFinished(false);
+        let quizData =
+          result.quiz;
 
-      setShowResult(false);
-    } catch (error) {
-      console.error(error);
-      alert(
-        "Failed to generate quiz"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (
+          typeof quizData ===
+          "string"
+        ) {
+          quizData =
+            JSON.parse(
+              quizData
+            );
+        }
+
+        setQuestions(
+          quizData
+        );
+
+        setCurrentQuestion(0);
+        setScore(0);
+
+        setSelectedAnswer("");
+
+        setQuizStarted(true);
+
+        setQuizFinished(false);
+
+      } catch (error) {
+
+        console.log(error);
+
+        alert(
+          "Failed to generate quiz"
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    };
 
   const handleSubmitAnswer =
     () => {
@@ -117,9 +160,10 @@ function Quiz() {
     };
 
   const goToNextQuestion =
-    () => {
+    async () => {
 
       setShowResult(false);
+
       setSelectedAnswer("");
 
       if (
@@ -134,10 +178,30 @@ function Quiz() {
 
       } else {
 
-        setQuizFinished(true);
+        try {
 
+          await submitQuizResult(
+            selectedDoc,
+            score,
+            questions.length
+          );
+
+        } catch (error) {
+
+          console.log(error);
+
+        }
+
+        setQuizFinished(
+          true
+        );
       }
     };
+
+    <LanguageSelector
+  language={language}
+  setLanguage={setLanguage}
+/>
 
   const getGrade =
     (percentage) => {
@@ -193,11 +257,6 @@ function Quiz() {
               📝 AI Quiz Generator
             </h1>
 
-            <p>
-              Generate MCQs
-              from uploaded notes.
-            </p>
-
             <select
               value={
                 selectedDoc
@@ -208,6 +267,7 @@ function Quiz() {
                 )
               }
             >
+
               <option value="">
                 Select Document
               </option>
@@ -222,10 +282,13 @@ function Quiz() {
                       doc._id
                     }
                   >
-                    {doc.fileName}
+                    {
+                      doc.fileName
+                    }
                   </option>
                 )
               )}
+
             </select>
 
             <button
@@ -244,190 +307,163 @@ function Quiz() {
 
         {quizStarted &&
           !quizFinished &&
-          questions.length > 0 && (
+          questions.length >
+            0 && (
 
-          <div className="module-card">
+            <div className="module-card">
 
-            <h2>
-              Question{" "}
-              {currentQuestion + 1}
-              {" / "}
-              {questions.length}
-            </h2>
+              <h2>
+                Question{" "}
+                {currentQuestion + 1}
+                {" / "}
+                {questions.length}
+              </h2>
 
-            <div
-              style={{
-                width: "100%",
-                height: "10px",
-                background:
-                  "#e5e7eb",
-                borderRadius:
-                  "10px",
-                marginBottom:
-                  "20px",
-              }}
-            >
+              <h3>
+                {
+                  questions[
+                    currentQuestion
+                  ].question
+                }
+              </h3>
 
-              <div
-                style={{
-                  width:
-                    (
-                      ((currentQuestion + 1) /
-                        questions.length) *
-                      100
-                    ) + "%",
-                  height:
-                    "100%",
-                  background:
-                    "#4f46e5",
-                  borderRadius:
-                    "10px",
-                }}
-              />
+              <div className="quiz-options">
 
-            </div>
-
-            <h3>
-              {
-                questions[
+                {questions[
                   currentQuestion
-                ].question
-              }
-            </h3>
+                ].options.map(
+                  (
+                    option,
+                    index
+                  ) => (
 
-            <div className="quiz-options">
-
-              {questions[
-                currentQuestion
-              ].options.map(
-                (
-                  option,
-                  index
-                ) => (
-
-                  <label
-                    key={index}
-                    className={`quiz-option ${
-                      selectedAnswer ===
-                      option
-                        ? "selected"
-                        : ""
-                    }`}
-                  >
-
-                    <input
-                      type="radio"
-                      name="answer"
-                      value={option}
-                      checked={
+                    <label
+                      key={index}
+                      className={`quiz-option ${
                         selectedAnswer ===
                         option
-                      }
-                      onChange={() =>
-                        setSelectedAnswer(
+                          ? "selected"
+                          : ""
+                      }`}
+                    >
+
+                      <input
+                        type="radio"
+                        name="answer"
+                        value={
                           option
-                        )
-                      }
-                    />
+                        }
+                        checked={
+                          selectedAnswer ===
+                          option
+                        }
+                        onChange={() =>
+                          setSelectedAnswer(
+                            option
+                          )
+                        }
+                      />
 
-                    <span>
-                      {
-                        String.fromCharCode(
-                          65 + index
-                        )
-                      }
-                      . {option}
-                    </span>
+                      <span>
+                        {
+                          String.fromCharCode(
+                            65 +
+                              index
+                          )
+                        }
+                        . {option}
+                      </span>
 
-                  </label>
+                    </label>
 
-                )
-              )}
-
-            </div>
-
-            {showResult && (
-
-              <div
-                style={{
-                  marginTop:
-                    "20px",
-                }}
-              >
-
-                {isCorrect ? (
-
-                  <div
-                    style={{
-                      color:
-                        "green",
-                      fontWeight:
-                        "bold",
-                    }}
-                  >
-                    ✅ Correct Answer
-                  </div>
-
-                ) : (
-
-                  <div
-                    style={{
-                      color:
-                        "red",
-                      fontWeight:
-                        "bold",
-                    }}
-                  >
-                    ❌ Wrong Answer
-                    <br />
-
-                    Correct Answer:
-                    {" "}
-                    {
-                      questions[
-                        currentQuestion
-                      ].answer
-                    }
-                  </div>
-
+                  )
                 )}
 
               </div>
 
-            )}
+              {showResult && (
 
-            {!showResult ? (
+                <div
+                  style={{
+                    marginTop:
+                      "20px",
+                  }}
+                >
 
-              <button
-                onClick={
-                  handleSubmitAnswer
-                }
-                disabled={
-                  !selectedAnswer
-                }
-              >
-                Submit Answer
-              </button>
+                  {isCorrect ? (
 
-            ) : (
+                    <div
+                      style={{
+                        color:
+                          "green",
+                        fontWeight:
+                          "bold",
+                      }}
+                    >
+                      ✅ Correct Answer
+                    </div>
 
-              <button
-                onClick={
-                  goToNextQuestion
-                }
-              >
-                {currentQuestion ===
-                questions.length -
-                  1
-                  ? "Finish Quiz"
-                  : "Next Question"}
-              </button>
+                  ) : (
 
-            )}
+                    <div
+                      style={{
+                        color:
+                          "red",
+                        fontWeight:
+                          "bold",
+                      }}
+                    >
+                      ❌ Wrong Answer
 
-          </div>
+                      <br />
 
-        )}
+                      Correct Answer:
+                      {" "}
+                      {
+                        questions[
+                          currentQuestion
+                        ].answer
+                      }
+                    </div>
+
+                  )}
+
+                </div>
+
+              )}
+
+              {!showResult ? (
+
+                <button
+                  onClick={
+                    handleSubmitAnswer
+                  }
+                  disabled={
+                    !selectedAnswer
+                  }
+                >
+                  Submit Answer
+                </button>
+
+              ) : (
+
+                <button
+                  onClick={
+                    goToNextQuestion
+                  }
+                >
+                  {currentQuestion ===
+                  questions.length -
+                    1
+                    ? "Finish Quiz"
+                    : "Next Question"}
+                </button>
+
+              )}
+
+            </div>
+
+          )}
 
         {quizFinished && (
 
@@ -441,8 +477,10 @@ function Quiz() {
               Score:
               {" "}
               {score}
-              {" / "}
-              {questions.length}
+              /
+              {
+                questions.length
+              }
             </h2>
 
             <h2>
@@ -460,22 +498,6 @@ function Quiz() {
                 )
               )}
             </h2>
-
-            <button
-              onClick={() => {
-                setQuizStarted(
-                  false
-                );
-                setQuizFinished(
-                  false
-                );
-                setQuestions([]);
-                setSelectedDoc("");
-                setScore(0);
-              }}
-            >
-              Generate New Quiz
-            </button>
 
           </div>
 
