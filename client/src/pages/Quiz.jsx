@@ -507,5 +507,4 @@ useState("English");
     </>
   );
 }
-
 export default Quiz;
