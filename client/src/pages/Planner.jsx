@@ -3,8 +3,6 @@ import {
   useState,
 } from "react";
 import Navbar from "../components/Navbar";
-<<<<<<< HEAD
-=======
 import LanguageSelector from "../components/LanguageSelector";
 
 >>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)
