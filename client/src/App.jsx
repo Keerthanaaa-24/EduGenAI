@@ -3,8 +3,6 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-<<<<<<< HEAD
-=======
 
 import {
   useAuth,
