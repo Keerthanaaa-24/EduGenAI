@@ -15,7 +15,6 @@ export const generatePlan =
       localStorage.getItem(
         "token"
       );
-
     const response =
       await axios.post(
         `${API}/generate`,
