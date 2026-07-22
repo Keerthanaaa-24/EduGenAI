@@ -1,10 +1,8 @@
-<<<<<<< HEAD
+
 const express = require("express");
-=======
 const express =
   require("express");
 
->>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)
 const auth =
   require("../middleware/auth");
 
