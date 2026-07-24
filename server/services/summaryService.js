@@ -2,7 +2,6 @@ const client =
   require("../config/openrouter");
 const MODEL =
   require("../config/model");
-
 const generateSummary =
   async (
     text,
