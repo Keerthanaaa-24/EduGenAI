@@ -1,6 +1,5 @@
 const client =
   require("../config/openrouter");
-
 const MODEL =
   require("../config/model");
 
