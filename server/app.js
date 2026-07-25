@@ -9,7 +9,6 @@ const plannerRoutes = require("./routes/plannerRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 
 const errorHandler = require("./middleware/errorHandler");
-
 const app = express();
 
 app.use(cors());
