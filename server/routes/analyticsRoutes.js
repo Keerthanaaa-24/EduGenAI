@@ -1,53 +1,57 @@
+import express from "express";
 
-const express = require("express");
-const express =
-  require("express");
+import auth from "../middleware/auth.js";
 
-const auth =
-  require("../middleware/auth");
+import Analytics from "../models/Analytics.js";
+import QuizAttempt from "../models/QuizAttempt.js";
 
-const Analytics =
-  require("../models/Analytics");
+const router = express.Router();
 
-const QuizAttempt =
-  require("../models/QuizAttempt");
-
-const router =
-  express.Router();
-
+/*
+ * GET /api/analytics/dashboard
+ *
+ * Returns the current user's analytics
+ * and recent quiz history.
+ */
 router.get(
   "/dashboard",
   auth,
   async (req, res) => {
+    try {
+      const userId = req.user._id;
 
-    const analytics =
-      await Analytics.findOne({
-        user:
-          req.user.id,
-      });
+      const analytics =
+        await Analytics.findOne({
+          user: userId,
+        });
 
-    const history =
-      await QuizAttempt.find({
-        user:
-          req.user.id,
-      })
-        .sort({
-          createdAt: -1,
+      const history =
+        await QuizAttempt.find({
+          user: userId,
         })
-        .limit(10);
+          .sort({
+            createdAt: -1,
+          })
+          .limit(10);
 
-    res.json({
-      success: true,
-      analytics,
-      history,
-    });
+      return res.status(200).json({
+        success: true,
+        analytics,
+        history,
+      });
+    } catch (error) {
+      console.error(
+        "Analytics Dashboard Error:",
+        error
+      );
 
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to load analytics.",
+      });
+    }
   }
 );
 
-<<<<<<< HEAD
-module.exports = router;
-=======
-module.exports =
-  router;
->>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)
+export default router;

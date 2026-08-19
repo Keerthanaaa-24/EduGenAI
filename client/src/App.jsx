@@ -8,7 +8,6 @@ import {
   useAuth,
 } from "./context/AuthContext";
 
->>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -20,34 +19,25 @@ import Planner from "./pages/Planner";
 import Analytics from "./pages/Analytics";
 
 function App() {
-  const { user } =
-    useAuth();
+  const { user } = useAuth();
 
-  const PrivateRoute = ({
-    children,
-  }) => {
+  const PrivateRoute = ({ children }) => {
     return user ? (
       children
     ) : (
-      <Navigate
-        to="/login"
-        replace
-      />
+      <Navigate to="/login" replace />
     );
   };
 
   return (
     <Routes>
-
-      {/* PUBLIC ROUTES */}
+      {/* Public Routes */}
 
       <Route
         path="/login"
         element={
           user ? (
-            <Navigate
-              to="/dashboard"
-            />
+            <Navigate to="/dashboard" replace />
           ) : (
             <Login />
           )
@@ -58,16 +48,14 @@ function App() {
         path="/register"
         element={
           user ? (
-            <Navigate
-              to="/dashboard"
-            />
+            <Navigate to="/dashboard" replace />
           ) : (
             <Register />
           )
         }
       />
 
-      {/* PROTECTED ROUTES */}
+      {/* Protected Routes */}
 
       <Route
         path="/dashboard"
@@ -132,21 +120,17 @@ function App() {
         }
       />
 
-      {/* DEFAULT */}
+      {/* Default Route */}
 
       <Route
         path="*"
         element={
           <Navigate
-            to={
-              user
-                ? "/dashboard"
-                : "/login"
-            }
+            to={user ? "/dashboard" : "/login"}
+            replace
           />
         }
       />
-
     </Routes>
   );
 }

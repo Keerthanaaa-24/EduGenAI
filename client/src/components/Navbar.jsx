@@ -2,9 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 function Navbar() {
   const { logout } = useAuth();
-<<<<<<< HEAD
-=======
-
   const navigate =
     useNavigate();
 
@@ -14,8 +11,6 @@ function Navbar() {
 
     navigate("/login");
   };
-
->>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)
   return (
     <nav className="modern-navbar">
 

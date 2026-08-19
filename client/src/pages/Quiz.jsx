@@ -1,342 +1,299 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import LanguageSelector from "../components/LanguageSelector";
+
 import { getDocuments } from "../services/documentService";
+
 import {
   generateQuiz,
   submitQuizResult,
 } from "../services/quizService";
-import LanguageSelector from "../components/LanguageSelector";
 
 function Quiz() {
-  const [documents, setDocuments] =
-    useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [selectedDoc, setSelectedDoc] = useState("");
+  const [language, setLanguage] = useState("English");
 
-  const [selectedDoc,
-    setSelectedDoc] =
-    useState("");
+  const [questions, setQuestions] = useState([]);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
 
-  const [questions,
-    setQuestions] =
-    useState([]);
+  const [selectedAnswer, setSelectedAnswer] = useState("");
+  const [score, setScore] = useState(0);
 
-  const [currentQuestion,
-    setCurrentQuestion] =
-    useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const [selectedAnswer,
-    setSelectedAnswer] =
-    useState("");
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [quizFinished, setQuizFinished] = useState(false);
 
-  const [score,
-    setScore] =
-    useState(0);
-
-  const [loading,
-    setLoading] =
-    useState(false);
-
-  const [quizStarted,
-    setQuizStarted] =
-    useState(false);
-
-  const [quizFinished,
-    setQuizFinished] =
-    useState(false);
-
-    const [language,
-setLanguage] =
-useState("English");
-
-  const [showResult,
-    setShowResult] =
-    useState(false);
-
-  const [isCorrect,
-    setIsCorrect] =
-    useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
 
   useEffect(() => {
     loadDocuments();
   }, []);
 
-  const loadDocuments =
-    async () => {
-      try {
-        const result =
-          await getDocuments();
+  const loadDocuments = async () => {
+    try {
+      const result = await getDocuments();
+      setDocuments(result.documents || []);
+    } catch (error) {
+      console.error("Failed to load documents:", error);
+    }
+  };
 
-        setDocuments(
-          result.documents || []
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  const handleGenerate = async () => {
+    if (!selectedDoc) {
+      alert("Please select a document first.");
+      return;
+    }
 
-  const handleGenerate =
-    async () => {
+    try {
+      setLoading(true);
 
-      if (!selectedDoc) {
-        alert(
-          "Select a document first"
-        );
-        return;
-      }
-
-      try {
-
-        setLoading(true);
-
-        const result =
-          await generateQuiz(
-            selectedDoc
-          );
-
-        let quizData =
-          result.quiz;
-
-        if (
-          typeof quizData ===
-          "string"
-        ) {
-          quizData =
-            JSON.parse(
-              quizData
-            );
-        }
-
-        setQuestions(
-          quizData
-        );
-
-        setCurrentQuestion(0);
-        setScore(0);
-
-        setSelectedAnswer("");
-
-        setQuizStarted(true);
-
-        setQuizFinished(false);
-
-      } catch (error) {
-
-        console.log(error);
-
-        alert(
-          "Failed to generate quiz"
-        );
-
-      } finally {
-
-        setLoading(false);
-
-      }
-    };
-
-  const handleSubmitAnswer =
-    () => {
-
-      const current =
-        questions[
-          currentQuestion
-        ];
-
-      const correct =
-        selectedAnswer ===
-        current.answer;
-
-      setIsCorrect(
-        correct
+      const result = await generateQuiz(
+        selectedDoc,
+        language
       );
 
-      if (correct) {
-        setScore(
-          (prev) =>
-            prev + 1
+      console.log("Quiz API Response:", result);
+
+      let quizData = result.quiz;
+
+      // Gemini may return JSON inside a markdown code block.
+      if (typeof quizData === "string") {
+        quizData = quizData
+          .replace(/```json/gi, "")
+          .replace(/```/g, "")
+          .trim();
+
+        quizData = JSON.parse(quizData);
+      }
+
+      if (!Array.isArray(quizData)) {
+        throw new Error(
+          "Invalid quiz format received."
         );
       }
 
-      setShowResult(true);
-    };
-
-  const goToNextQuestion =
-    async () => {
-
-      setShowResult(false);
-
+      setQuestions(quizData);
+      setCurrentQuestion(0);
+      setScore(0);
       setSelectedAnswer("");
+      setQuizStarted(true);
+      setQuizFinished(false);
+      setShowResult(false);
+      setIsCorrect(false);
+    } catch (error) {
+      console.error("Quiz Generation Error:", error);
+      console.error(
+        "Backend Response:",
+        error.response?.data
+      );
 
-      if (
-        currentQuestion <
-        questions.length - 1
-      ) {
+      alert(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to generate quiz."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        setCurrentQuestion(
-          (prev) =>
-            prev + 1
-        );
+  const handleSubmitAnswer = () => {
+    if (!selectedAnswer) {
+      alert("Please select an answer.");
+      return;
+    }
 
-      } else {
+    const current = questions[currentQuestion];
 
-        try {
+    const correct =
+      selectedAnswer === current.answer;
 
-          await submitQuizResult(
-            selectedDoc,
-            score,
-            questions.length
-          );
+    setIsCorrect(correct);
 
-        } catch (error) {
+    if (correct) {
+      setScore((prev) => prev + 1);
+    }
 
-          console.log(error);
+    setShowResult(true);
+  };
 
-        }
+  const goToNextQuestion = async () => {
+    const current = questions[currentQuestion];
 
-        setQuizFinished(
-          true
-        );
-      }
-    };
+    // Calculate final score correctly because React state
+    // updates asynchronously.
+    const finalScore =
+      selectedAnswer === current.answer
+        ? score + 1
+        : score;
 
-    <LanguageSelector
-  language={language}
-  setLanguage={setLanguage}
-/>
+    setShowResult(false);
+    setSelectedAnswer("");
 
-  const getGrade =
-    (percentage) => {
+    if (
+      currentQuestion <
+      questions.length - 1
+    ) {
+      setScore(finalScore);
 
-      if (
-        percentage >= 90
-      )
-        return "O";
+      setCurrentQuestion(
+        (prev) => prev + 1
+      );
 
-      if (
-        percentage >= 80
-      )
-        return "A+";
+      return;
+    }
 
-      if (
-        percentage >= 70
-      )
-        return "A";
+    try {
+      await submitQuizResult(
+        selectedDoc,
+        finalScore,
+        questions.length
+      );
+    } catch (error) {
+      console.error(
+        "Quiz Result Error:",
+        error
+      );
+    }
 
-      if (
-        percentage >= 60
-      )
-        return "B";
+    setScore(finalScore);
+    setQuizFinished(true);
+  };
 
-      if (
-        percentage >= 50
-      )
-        return "C";
+  const getGrade = (percentage) => {
+    if (percentage >= 90) return "O";
+    if (percentage >= 80) return "A+";
+    if (percentage >= 70) return "A";
+    if (percentage >= 60) return "B+";
+    if (percentage >= 50) return "B";
+    if (percentage >= 40) return "C";
 
-      return "F";
-    };
+    return "F";
+  };
 
   const percentage =
     questions.length > 0
       ? (
-          (score /
-            questions.length) *
+          (score / questions.length) *
           100
         ).toFixed(2)
-      : 0;
+      : "0.00";
+
+  const resetQuiz = () => {
+    setQuizStarted(false);
+    setQuizFinished(false);
+    setQuestions([]);
+    setCurrentQuestion(0);
+    setSelectedAnswer("");
+    setScore(0);
+    setShowResult(false);
+    setIsCorrect(false);
+  };
 
   return (
     <>
       <Navbar />
 
       <div className="container">
-
         {!quizStarted && (
-
           <div className="module-card">
-
             <h1>
               📝 AI Quiz Generator
             </h1>
 
+            <p
+              style={{
+                color: "#666",
+                marginBottom: "20px",
+              }}
+            >
+              Generate an AI-powered quiz
+              from your uploaded study
+              material.
+            </p>
+
+            <label>
+              Select Document
+            </label>
+
             <select
-              value={
-                selectedDoc
-              }
+              value={selectedDoc}
               onChange={(e) =>
                 setSelectedDoc(
                   e.target.value
                 )
               }
             >
-
               <option value="">
-                Select Document
+                -- Select Document --
               </option>
 
-              {documents.map(
-                (doc) => (
-                  <option
-                    key={
-                      doc._id
-                    }
-                    value={
-                      doc._id
-                    }
-                  >
-                    {
-                      doc.fileName
-                    }
-                  </option>
-                )
-              )}
-
+              {documents.map((doc) => (
+                <option
+                  key={doc._id}
+                  value={doc._id}
+                >
+                  {doc.fileName}
+                </option>
+              ))}
             </select>
 
+            <br />
+            <br />
+
+            <LanguageSelector
+              language={language}
+              setLanguage={setLanguage}
+            />
+
+            <br />
+
             <button
-              onClick={
-                handleGenerate
-              }
+              onClick={handleGenerate}
+              disabled={loading}
+              style={{
+                width: "100%",
+              }}
             >
               {loading
-                ? "Generating..."
+                ? "Generating Quiz..."
                 : "Generate Quiz"}
             </button>
-
           </div>
-
         )}
 
         {quizStarted &&
           !quizFinished &&
-          questions.length >
-            0 && (
-
+          questions.length > 0 && (
             <div className="module-card">
-
               <h2>
                 Question{" "}
-                {currentQuestion + 1}
-                {" / "}
+                {currentQuestion + 1} /{" "}
                 {questions.length}
               </h2>
 
-              <h3>
+              <div
+                style={{
+                  marginBottom: "20px",
+                  fontSize: "22px",
+                  fontWeight: "bold",
+                }}
+              >
                 {
                   questions[
                     currentQuestion
                   ].question
                 }
-              </h3>
+              </div>
 
               <div className="quiz-options">
-
                 {questions[
                   currentQuestion
                 ].options.map(
-                  (
-                    option,
-                    index
-                  ) => (
-
+                  (option, index) => (
                     <label
                       key={index}
                       className={`quiz-option ${
@@ -346,13 +303,10 @@ useState("English");
                           : ""
                       }`}
                     >
-
                       <input
                         type="radio"
                         name="answer"
-                        value={
-                          option
-                        }
+                        value={option}
                         checked={
                           selectedAnswer ===
                           option
@@ -365,146 +319,135 @@ useState("English");
                       />
 
                       <span>
-                        {
-                          String.fromCharCode(
-                            65 +
-                              index
-                          )
-                        }
+                        {String.fromCharCode(
+                          65 + index
+                        )}
                         . {option}
                       </span>
-
                     </label>
-
                   )
                 )}
-
               </div>
 
               {showResult && (
-
                 <div
                   style={{
-                    marginTop:
-                      "20px",
+                    marginTop: "20px",
                   }}
                 >
-
                   {isCorrect ? (
-
                     <div
                       style={{
-                        color:
-                          "green",
+                        color: "green",
                         fontWeight:
                           "bold",
+                        fontSize:
+                          "18px",
                       }}
                     >
                       ✅ Correct Answer
                     </div>
-
                   ) : (
-
                     <div
                       style={{
-                        color:
-                          "red",
+                        color: "red",
                         fontWeight:
                           "bold",
+                        fontSize:
+                          "18px",
                       }}
                     >
                       ❌ Wrong Answer
-
                       <br />
-
                       Correct Answer:
-                      {" "}
-                      {
-                        questions[
-                          currentQuestion
-                        ].answer
-                      }
+                      <br />
+                      <strong>
+                        {
+                          questions[
+                            currentQuestion
+                          ].answer
+                        }
+                      </strong>
                     </div>
-
                   )}
-
                 </div>
-
               )}
 
               {!showResult ? (
-
                 <button
                   onClick={
                     handleSubmitAnswer
                   }
-                  disabled={
-                    !selectedAnswer
-                  }
+                  disabled={!selectedAnswer}
+                  style={{
+                    marginTop: "25px",
+                    width: "100%",
+                  }}
                 >
                   Submit Answer
                 </button>
-
               ) : (
-
                 <button
                   onClick={
                     goToNextQuestion
                   }
+                  style={{
+                    marginTop: "25px",
+                    width: "100%",
+                  }}
                 >
                   {currentQuestion ===
-                  questions.length -
-                    1
+                  questions.length - 1
                     ? "Finish Quiz"
                     : "Next Question"}
                 </button>
-
               )}
-
             </div>
-
           )}
 
         {quizFinished && (
-
           <div className="module-card">
-
             <h1>
               🎉 Quiz Completed
             </h1>
 
             <h2>
-              Score:
-              {" "}
-              {score}
-              /
-              {
-                questions.length
-              }
+              Your Score
+            </h2>
+
+            <h1
+              style={{
+                color: "#4CAF50",
+                fontSize: "50px",
+              }}
+            >
+              {score} / {questions.length}
+            </h1>
+
+            <h2>
+              Percentage: {percentage}%
             </h2>
 
             <h2>
-              Percentage:
-              {" "}
-              {percentage}%
-            </h2>
-
-            <h2>
-              Grade:
-              {" "}
+              Grade:{" "}
               {getGrade(
-                Number(
-                  percentage
-                )
+                Number(percentage)
               )}
             </h2>
 
+            <button
+              style={{
+                marginTop: "30px",
+              }}
+              onClick={resetQuiz}
+            >
+              Generate Another Quiz
+            </button>
           </div>
-
         )}
-
       </div>
     </>
   );
 }
+
 export default Quiz;

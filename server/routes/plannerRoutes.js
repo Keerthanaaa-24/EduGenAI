@@ -1,29 +1,27 @@
 const express = require("express");
-const auth =
-  require("../middleware/auth");
+const auth = require("../middleware/auth");
 
-const StudyPlan =
-  require("../models/StudyPlan");
-
-const Document =
-  require("../models/Document");
-
-const Analytics =
-  require("../models/Analytics");
+const StudyPlan = require("../models/StudyPlan");
+const Document = require("../models/Document");
+const Analytics = require("../models/Analytics");
 
 const {
   generateStudyPlan,
 } = require("../services/plannerService");
 
-const router =
-  express.Router();
+const router = express.Router();
+
+/*
+==========================================
+Generate Study Plan
+==========================================
+*/
 
 router.post(
   "/generate",
   auth,
   async (req, res) => {
     try {
-
       const {
         subject,
         examDate,
@@ -33,18 +31,13 @@ router.post(
       } = req.body;
 
       const document =
-        await Document.findById(
-          documentId
-        );
+        await Document.findById(documentId);
 
       if (!document) {
-
         return res.status(404).json({
           success: false,
-          message:
-            "Document not found",
+          message: "Document not found",
         });
-
       }
 
       const plan =
@@ -58,31 +51,23 @@ router.post(
 
       const studyPlan =
         await StudyPlan.create({
-          user:
-            req.user.id,
-
+          user: req.user.id,
           subject,
-
           examDate,
-
           hoursPerDay,
-
           plan,
         });
 
       await Analytics.findOneAndUpdate(
-        {
-          user:
-            req.user.id,
-        },
+        { user: req.user.id },
         {
           $inc: {
-            studyPlansGenerated:
-              1,
+            studyPlansGenerated: 1,
           },
         },
         {
           upsert: true,
+          new: true,
         }
       );
 
@@ -92,28 +77,32 @@ router.post(
       });
 
     } catch (error) {
+      console.error(error);
 
       res.status(500).json({
         success: false,
-        message:
-          error.message,
+        message: error.message,
       });
-
     }
   }
 );
+
+/*
+==========================================
+Get My Study Plans
+==========================================
+*/
 
 router.get(
   "/my-plans",
   auth,
   async (req, res) => {
-
     try {
-
       const plans =
         await StudyPlan.find({
-          user:
-            req.user.id,
+          user: req.user.id,
+        }).sort({
+          createdAt: -1,
         });
 
       res.json({
@@ -122,21 +111,14 @@ router.get(
       });
 
     } catch (error) {
+      console.error(error);
 
       res.status(500).json({
         success: false,
-        message:
-          error.message,
+        message: error.message,
       });
-
     }
-
   }
 );
 
-<<<<<<< HEAD
 module.exports = router;
-=======
-module.exports =
-  router;
->>>>>>> d2968d4 (Add language selector and update planner, quiz, analytics features)
