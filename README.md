@@ -100,7 +100,6 @@ CHROMA_URL=http://localhost:8000
 * Flashcards
 * Voice Assistant
 * Real ChromaDB Vector Search
-* Multi-language Support
 * AI Tutor Mode
 
 ---
