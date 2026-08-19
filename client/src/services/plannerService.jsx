@@ -1,27 +1,37 @@
 import axios from "axios";
+
 const API =
   "http://localhost:5000/api/planner";
+
+/*
+==========================================
+GENERATE MINI STUDY PLAN
+==========================================
+*/
 
 export const generatePlan =
   async (
     subject,
-    examDate,
+    days,
     hoursPerDay,
+    startTime,
     documentId,
-    language
+    language = "English"
   ) => {
 
     const token =
       localStorage.getItem(
         "token"
       );
+
     const response =
       await axios.post(
         `${API}/generate`,
         {
           subject,
-          examDate,
+          days,
           hoursPerDay,
+          startTime,
           documentId,
           language,
         },
@@ -35,6 +45,12 @@ export const generatePlan =
 
     return response.data;
   };
+
+/*
+==========================================
+GET USER'S SAVED PLANS
+==========================================
+*/
 
 export const getPlans =
   async () => {

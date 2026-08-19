@@ -1,51 +1,192 @@
 const client =
   require("../config/openrouter");
+
 const MODEL =
   require("../config/model");
+
+/*
+==================================================
+GENERATE SUMMARY
+==================================================
+*/
+
 const generateSummary =
   async (
     text,
-    language
+    language = "English"
   ) => {
 
+    /*
+    Validate input
+    */
+
+    if (
+      !text ||
+      !text.trim()
+    ) {
+      throw new Error(
+        "Study material is empty."
+      );
+    }
+
+    const studyMaterial =
+      text.substring(
+        0,
+        12000
+      );
+
     const prompt = `
-You are EduGen AI.
+You are EduGen AI, an intelligent educational study assistant.
 
-Generate comprehensive revision notes ONLY in ${language}.
+Create detailed revision notes from the study material provided below.
 
-Requirements:
+LANGUAGE:
+${language}
 
-• Use ONLY ${language}.
-• Do not mix English unless absolutely necessary.
-• Create approximately 5–6 pages of study notes.
-• Include:
-  - Headings
-  - Sub-headings
-  - Important definitions
-  - Important formulas
-  - Key points
-  - Exam tips
-  - 2-mark questions
-  - 16-mark questions
-  - Revision summary
+STRICT REQUIREMENTS:
 
-Study Material:
+1. Use ONLY information from the provided study material.
+2. Write the complete response in ${language}.
+3. Do not invent information.
+4. Do not use information that is not present in the study material.
+5. Organize the notes clearly using headings and subheadings.
+6. Include important definitions.
+7. Include important concepts and key points.
+8. Include formulas only when they are present in the material.
+9. Include important examples when present in the material.
+10. Include exam-oriented points.
+11. Include a short revision summary at the end.
+12. Keep the content useful for engineering students.
+13. Do not mention that you are an AI.
+14. Do not add information from outside sources.
 
-${text.substring(0, 12000)}
+Suggested structure:
+
+# Revision Notes
+
+## 1. Main Topic
+
+### Definition
+
+### Important Concepts
+
+### Key Points
+
+### Examples
+
+## 2. Next Topic
+
+### Definition
+
+### Important Concepts
+
+### Key Points
+
+## Important Exam Points
+
+## Quick Revision
+
+STUDY MATERIAL:
+
+${studyMaterial}
 `;
 
-    const response =
-      await client.chat.completions.create({
-        model: MODEL,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      });
+    try {
 
-    return response.choices[0].message.content;
+      console.log(
+        "========== SUMMARY AI REQUEST =========="
+      );
+
+      console.log(
+        "Model:",
+        MODEL
+      );
+
+      console.log(
+        "Language:",
+        language
+      );
+
+      /*
+      Call AI
+      */
+
+      const response =
+        await client.chat.completions.create({
+
+          model:
+            MODEL,
+
+          temperature:
+            0.3,
+
+          messages: [
+
+            {
+              role:
+                "system",
+
+              content:
+                "You are EduGen AI. Generate accurate educational revision notes using only the supplied study material.",
+
+            },
+
+            {
+              role:
+                "user",
+
+              content:
+                prompt,
+
+            },
+
+          ],
+        });
+
+      /*
+      Get response
+      */
+
+      const summary =
+        response
+          ?.choices?.[0]
+          ?.message
+          ?.content;
+
+      if (
+        !summary ||
+        !summary.trim()
+      ) {
+        throw new Error(
+          "AI returned an empty summary."
+        );
+      }
+
+      console.log(
+        "========== SUMMARY GENERATED =========="
+      );
+
+      console.log(
+        `Summary length: ${summary.length} characters`
+      );
+
+      return summary.trim();
+
+    } catch (error) {
+
+      console.error(
+        "========== SUMMARY SERVICE ERROR =========="
+      );
+
+      console.error(
+        error
+      );
+
+      throw new Error(
+        error.message ||
+        "Failed to generate summary."
+      );
+    }
   };
 
 module.exports = {

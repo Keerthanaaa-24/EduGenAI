@@ -1,263 +1,807 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import Navbar from "../components/Navbar";
 
 import {
-  FaRobot,
-  FaFileAlt,
-  FaClipboardList,
-  FaCalendarAlt,
-  FaChartLine,
-  FaFire,
-} from "react-icons/fa";
-
-import { useAuth } from "../context/AuthContext";
+  getAnalytics,
+  clearActivities,
+} from "../services/analyticsService";
 
 function Dashboard() {
-  const { user } =
-    useAuth();
+
+  const [
+    userStats,
+    setUserStats,
+  ] = useState(null);
+
+  const [
+    analytics,
+    setAnalytics,
+  ] = useState(null);
+
+  const [
+    activities,
+    setActivities,
+  ] = useState([]);
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
+
+  /*
+  ==========================================
+  LOAD DASHBOARD
+  ==========================================
+  */
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard =
+    async () => {
+
+      try {
+
+        setLoading(true);
+
+        const result =
+          await getAnalytics();
+
+        setUserStats(
+          result.user || {}
+        );
+
+        setAnalytics(
+          result.analytics || {}
+        );
+
+        setActivities(
+          result.recentActivities ||
+          []
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Dashboard Error:",
+          error
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    };
+
+  /*
+  ==========================================
+  CLEAR RECENT ACTIVITY
+  ==========================================
+  */
+
+  const handleClearActivities =
+    async () => {
+
+      if (
+        activities.length === 0
+      ) {
+
+        alert(
+          "There is no activity to clear."
+        );
+
+        return;
+      }
+
+      const confirmed =
+        window.confirm(
+          "Are you sure you want to clear your recent activity?"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+
+        await clearActivities();
+
+        /*
+        Clear activity list
+        immediately.
+        */
+
+        setActivities([]);
+
+        /*
+        Reset activity counter.
+        */
+
+        setUserStats(
+          (previous) => ({
+            ...previous,
+
+            totalActivities:
+              0,
+          })
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Clear Activity Error:",
+          error
+        );
+
+        alert(
+          error.response?.data
+            ?.message ||
+          error.message ||
+          "Failed to clear recent activity."
+        );
+      }
+    };
+
+  /*
+  ==========================================
+  ACTIVITY ICON
+  ==========================================
+  */
+
+  const getActivityIcon =
+    (type) => {
+
+      switch (type) {
+
+        case "document_upload":
+          return "📄";
+
+        case "document_delete":
+          return "🗑️";
+
+        case "quiz_generated":
+          return "📝";
+
+        case "quiz_completed":
+          return "🎯";
+
+        case "summary_generated":
+          return "📚";
+
+        case "study_plan_generated":
+          return "📅";
+
+        case "chat":
+          return "🤖";
+
+        default:
+          return "📌";
+      }
+    };
+
+  /*
+  ==========================================
+  FORMAT DATE
+  ==========================================
+  */
+
+  const formatDate =
+    (date) => {
+
+      if (!date) {
+        return "";
+      }
+
+      return new Date(
+        date
+      ).toLocaleDateString(
+        "en-IN",
+        {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }
+      );
+    };
+
+  /*
+  ==========================================
+  PROGRESS MESSAGE
+  ==========================================
+  */
+
+  const getProgressMessage =
+    (progress) => {
+
+      if (progress >= 80) {
+
+        return (
+          "Excellent progress! Keep going! 🏆"
+        );
+      }
+
+      if (progress >= 60) {
+
+        return (
+          "You're doing great! 🚀"
+        );
+      }
+
+      if (progress >= 40) {
+
+        return (
+          "Good progress. Keep learning! 📚"
+        );
+      }
+
+      if (progress >= 20) {
+
+        return (
+          "You're getting started! 🌱"
+        );
+      }
+
+      return (
+        "Start learning to build your progress! 💡"
+      );
+    };
+
+  /*
+  ==========================================
+  LOADING
+  ==========================================
+  */
+
+  if (loading) {
+
+    return (
+      <>
+        <Navbar />
+
+        <div
+          className="dashboard-container"
+        >
+
+          <h2>
+            Loading Dashboard...
+          </h2>
+
+        </div>
+      </>
+    );
+  }
+
+  const progress =
+    userStats?.progress || 0;
+
+  /*
+  ==========================================
+  DASHBOARD
+  ==========================================
+  */
 
   return (
     <>
       <Navbar />
 
-      <div className="dashboard-container">
+      <div
+        className="dashboard-container"
+      >
 
-        {/* HERO */}
+        {/* ==================================
+            HEADER
+        ================================== */}
 
-        <div className="hero-card">
+        <h1>
+          👋 Welcome back!
+        </h1>
 
-          <h1>
-            👋 Welcome Back,
-            {" "}
-            {user?.name ||
-              "Student"}
-          </h1>
+        <p
+          style={{
+            color: "#666",
+          }}
+        >
+          Track your learning journey
+          and keep improving every day.
+        </p>
 
-          <p>
-            Continue your
-            AI-powered learning
-            journey with
-            EduGen AI.
-          </p>
+        {/* ==================================
+            TOP STATS
+        ================================== */}
 
-          <div className="hero-badges">
+        <div
+          className="stats-grid"
+        >
 
-            <span>
-              🔥 Streak:
-              1 Day
-            </span>
+          <div
+            className="stat-card"
+          >
 
-            <span>
-              ⭐ Rating:
-              Beginner
-            </span>
-
-            <span>
-              📈 Progress:
-              0%
-            </span>
-
-          </div>
-
-        </div>
-
-        {/* STATS */}
-
-        <div className="stats-grid">
-
-          <div className="stat-card">
-            <div className="stat-icon">
-              📄
-            </div>
+            <h2>
+              🔥
+            </h2>
 
             <h3>
-              Notes Upload
+              Learning Streak
             </h3>
 
             <p>
-              Upload study
-              materials
+              {
+                userStats?.streakDays ||
+                0
+              }{" "}
+              days
             </p>
+
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">
-              🤖
-            </div>
+          <div
+            className="stat-card"
+          >
+
+            <h2>
+              📈
+            </h2>
 
             <h3>
-              AI Chat
+              Learning Progress
             </h3>
 
             <p>
-              Ask questions
-              instantly
+              {progress}%
             </p>
+
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">
+          <div
+            className="stat-card"
+          >
+
+            <h2>
+              ⭐
+            </h2>
+
+            <h3>
+              Current Level
+            </h3>
+
+            <p>
+              {
+                userStats?.level ||
+                "Beginner"
+              }
+            </p>
+
+          </div>
+
+          <div
+            className="stat-card"
+          >
+
+            <h2>
               📝
-            </div>
+            </h2>
 
             <h3>
-              Quiz Generator
+              Quiz Attempts
             </h3>
 
             <p>
-              Practice with
-              MCQs
-            </p>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon">
-              📊
-            </div>
-
-            <h3>
-              Analytics
-            </h3>
-
-            <p>
-              Track your
-              progress
-            </p>
-          </div>
-
-        </div>
-
-        {/* FEATURES */}
-
-        <h2 className="section-title">
-          🚀 Features
-        </h2>
-
-        <div className="feature-grid">
-
-          <div className="feature-card">
-
-            <FaRobot className="feature-icon" />
-
-            <h3>
-              AI Chat Assistant
-            </h3>
-
-            <p>
-              Ask questions
-              from uploaded
-              notes using AI.
-            </p>
-
-          </div>
-
-          <div className="feature-card">
-
-            <FaFileAlt className="feature-icon" />
-
-            <h3>
-              Smart Summary
-            </h3>
-
-            <p>
-              Generate detailed
-              revision notes.
-            </p>
-
-          </div>
-
-          <div className="feature-card">
-
-            <FaClipboardList className="feature-icon" />
-
-            <h3>
-              Quiz Generator
-            </h3>
-
-            <p>
-              Generate MCQs and
-              evaluate yourself.
-            </p>
-
-          </div>
-
-          <div className="feature-card">
-
-            <FaCalendarAlt className="feature-icon" />
-
-            <h3>
-              Study Planner
-            </h3>
-
-            <p>
-              Personalized
-              planning using AI.
-            </p>
-
-          </div>
-
-          <div className="feature-card">
-
-            <FaChartLine className="feature-icon" />
-
-            <h3>
-              Analytics
-            </h3>
-
-            <p>
-              Monitor learning
-              performance.
-            </p>
-
-          </div>
-
-          <div className="feature-card">
-
-            <FaFire className="feature-icon" />
-
-            <h3>
-              Daily Streak
-            </h3>
-
-            <p>
-              Stay consistent
-              every day.
+              {
+                analytics?.quizAttempts ||
+                0
+              }
             </p>
 
           </div>
 
         </div>
 
-        {/* RECENT ACTIVITY */}
+        {/* ==================================
+            LEARNING PROGRESS
+        ================================== */}
 
-        <div className="activity-card">
+        <div
+          className="module-card"
+          style={{
+            marginTop: "30px",
+          }}
+        >
 
           <h2>
-            📌 Recent Activity
+            📈 Your Learning Progress
           </h2>
 
-          <ul>
+          <div
+            style={{
+              background:
+                "#e5e7eb",
+              borderRadius:
+                "20px",
+              height:
+                "20px",
+              overflow:
+                "hidden",
+              marginTop:
+                "20px",
+            }}
+          >
 
-            <li>
-              Upload a PDF to
-              start learning.
-            </li>
+            <div
+              style={{
+                width:
+                  `${Math.min(
+                    Math.max(
+                      progress,
+                      0
+                    ),
+                    100
+                  )}%`,
+                height:
+                  "100%",
+                background:
+                  "linear-gradient(90deg, #4f46e5, #7c3aed)",
+                borderRadius:
+                  "20px",
+                transition:
+                  "width 0.5s ease",
+              }}
+            />
 
-            <li>
-              Generate a quiz
-              and test yourself.
-            </li>
+          </div>
 
-            <li>
-              Create summaries
-              for revision.
-            </li>
+          <div
+            style={{
+              display:
+                "flex",
+              justifyContent:
+                "space-between",
+              marginTop:
+                "10px",
+            }}
+          >
 
-            <li>
-              Build a study
-              planner.
-            </li>
+            <strong>
+              {progress}%
+            </strong>
 
-          </ul>
+            <span>
+              {
+                userStats?.level ||
+                "Beginner"
+              }
+            </span>
+
+          </div>
+
+          <p
+            style={{
+              marginTop:
+                "15px",
+              color:
+                "#666",
+            }}
+          >
+            {
+              getProgressMessage(
+                progress
+              )
+            }
+          </p>
+
+        </div>
+
+        {/* ==================================
+            QUICK STATISTICS
+        ================================== */}
+
+        <div
+          className="stats-grid"
+          style={{
+            marginTop:
+              "30px",
+          }}
+        >
+
+          <div
+            className="stat-card"
+          >
+
+            <h2>
+              📄
+            </h2>
+
+            <h3>
+              Documents
+            </h3>
+
+            <p>
+              {
+                analytics?.documentsUploaded ||
+                0
+              }
+            </p>
+
+          </div>
+
+          <div
+            className="stat-card"
+          >
+
+            <h2>
+              📚
+            </h2>
+
+            <h3>
+              Summaries
+            </h3>
+
+            <p>
+              {
+                analytics?.summariesGenerated ||
+                0
+              }
+            </p>
+
+          </div>
+
+          <div
+            className="stat-card"
+          >
+
+            <h2>
+              📅
+            </h2>
+
+            <h3>
+              Study Plans
+            </h3>
+
+            <p>
+              {
+                analytics?.studyPlansGenerated ||
+                0
+              }
+            </p>
+
+          </div>
+
+          <div
+            className="stat-card"
+          >
+
+            <h2>
+              ⚡
+            </h2>
+
+            <h3>
+              Activities
+            </h3>
+
+            <p>
+              {
+                userStats?.totalActivities ||
+                0
+              }
+            </p>
+
+          </div>
+
+        </div>
+
+        {/* ==================================
+            RECENT ACTIVITY
+        ================================== */}
+
+        <div
+          className="module-card"
+          style={{
+            marginTop:
+              "30px",
+          }}
+        >
+
+          {/* ACTIVITY HEADER */}
+
+          <div
+            style={{
+              display:
+                "flex",
+              justifyContent:
+                "space-between",
+              alignItems:
+                "center",
+              gap:
+                "15px",
+              marginBottom:
+                "15px",
+            }}
+          >
+
+            <h2
+              style={{
+                margin:
+                  0,
+              }}
+            >
+              🕒 Recent Activity
+            </h2>
+
+            {activities.length >
+              0 && (
+
+              <button
+                onClick={
+                  handleClearActivities
+                }
+                style={{
+                  width:
+                    "auto",
+                  padding:
+                    "8px 14px",
+                  background:
+                    "#ef4444",
+                  color:
+                    "#fff",
+                  border:
+                    "none",
+                  borderRadius:
+                    "8px",
+                  cursor:
+                    "pointer",
+                }}
+              >
+                🗑️ Clear
+              </button>
+
+            )}
+
+          </div>
+
+          {/* NO ACTIVITY */}
+
+          {activities.length ===
+          0 ? (
+
+            <div
+              style={{
+                textAlign:
+                  "center",
+                padding:
+                  "30px",
+                color:
+                  "#777",
+              }}
+            >
+
+              <div
+                style={{
+                  fontSize:
+                    "40px",
+                }}
+              >
+                📚
+              </div>
+
+              <p>
+                No learning activity
+                yet.
+              </p>
+
+              <small>
+                Upload a document,
+                take a quiz, generate
+                a summary or use the
+                AI tutor to start
+                building your
+                activity history.
+              </small>
+
+            </div>
+
+          ) : (
+
+            <div>
+
+              {activities
+                .slice(0, 10)
+                .map(
+                  (
+                    activity,
+                    index
+                  ) => (
+
+                    <div
+                      key={
+                        activity._id ||
+                        index
+                      }
+                      style={{
+                        display:
+                          "flex",
+                        alignItems:
+                          "center",
+                        gap:
+                          "15px",
+                        padding:
+                          "15px 5px",
+                        borderBottom:
+                          "1px solid #eee",
+                      }}
+                    >
+
+                      {/* ICON */}
+
+                      <div
+                        style={{
+                          fontSize:
+                            "28px",
+                        }}
+                      >
+                        {
+                          getActivityIcon(
+                            activity.type
+                          )
+                        }
+                      </div>
+
+                      {/* DETAILS */}
+
+                      <div
+                        style={{
+                          flex:
+                            1,
+                        }}
+                      >
+
+                        <strong>
+                          {
+                            activity.title
+                          }
+                        </strong>
+
+                        <p
+                          style={{
+                            margin:
+                              "5px 0",
+                            color:
+                              "#666",
+                          }}
+                        >
+                          {
+                            activity.description
+                          }
+                        </p>
+
+                        <small
+                          style={{
+                            color:
+                              "#999",
+                          }}
+                        >
+                          {
+                            formatDate(
+                              activity.createdAt
+                            )
+                          }
+                        </small>
+
+                      </div>
+
+                    </div>
+
+                  )
+                )}
+
+            </div>
+
+          )}
 
         </div>
 

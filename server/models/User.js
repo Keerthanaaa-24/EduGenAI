@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -25,15 +26,40 @@ const userSchema = new mongoose.Schema(
       enum: ["student", "admin"],
       default: "student",
     },
-    streakDays: {
-  type: Number,
-  default: 1,
-},
 
-lastLoginDate: {
-  type: Date,
-  default: Date.now,
-},
+    streakDays: {
+      type: Number,
+      default: 0,
+    },
+
+    lastActivityDate: {
+      type: Date,
+      default: null,
+    },
+
+    progress: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
+
+    level: {
+      type: String,
+      enum: [
+        "Beginner",
+        "Learner",
+        "Intermediate",
+        "Advanced",
+        "Expert",
+      ],
+      default: "Beginner",
+    },
+
+    totalActivities: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

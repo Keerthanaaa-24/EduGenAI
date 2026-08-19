@@ -10,10 +10,17 @@ const MODEL =
 const chunkText =
   require("../utils/chunkText");
 
+/*
+==================================================
+CREATE CONTEXT
+==================================================
+*/
+
 const createContext =
   async (
     documentId
   ) => {
+
     const document =
       await Document.findById(
         documentId
@@ -31,21 +38,32 @@ const createContext =
         1000
       );
 
-    return chunks.join("\n");
+    return chunks.join(
+      "\n"
+    );
   };
+
+/*
+==================================================
+ASK QUESTION
+==================================================
+*/
 
 const askQuestion =
   async (
     documentId,
     question
   ) => {
+
     const context =
       await createContext(
         documentId
       );
 
     const prompt = `
-Answer ONLY from the study material.
+You are EduGen AI, an intelligent study assistant.
+
+Answer the user's question ONLY using the uploaded study material.
 
 Study Material:
 ${context}
@@ -53,25 +71,32 @@ ${context}
 Question:
 ${question}
 
-If answer doesn't exist, say:
+Rules:
+- Use only information from the study material.
+- Do not invent information.
+- Give a clear and simple explanation.
+- If the answer is not available in the document, say:
 "Answer not found in uploaded document."
 `;
 
     const response =
       await client.chat.completions.create({
-        model: MODEL,
+        model:
+          MODEL,
 
         messages: [
           {
             role: "user",
-            content: prompt,
+            content:
+              prompt,
           },
         ],
       });
 
     return response
       .choices[0]
-      .message.content;
+      .message
+      .content;
   };
 
 module.exports = {

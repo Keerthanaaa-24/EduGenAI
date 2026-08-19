@@ -1,12 +1,14 @@
 import axios from "axios";
+
 const API =
   "http://localhost:5000/api/documents";
 
 /*
-====================================
+==================================================
 UPLOAD DOCUMENT
-====================================
+==================================================
 */
+
 export const uploadDocument =
   async (file) => {
 
@@ -31,8 +33,6 @@ export const uploadDocument =
           headers: {
             Authorization:
               `Bearer ${token}`,
-            "Content-Type":
-              "multipart/form-data",
           },
         }
       );
@@ -41,10 +41,11 @@ export const uploadDocument =
   };
 
 /*
-====================================
-GET ALL DOCUMENTS
-====================================
+==================================================
+GET ALL USER DOCUMENTS
+==================================================
 */
+
 export const getDocuments =
   async () => {
 
@@ -55,7 +56,35 @@ export const getDocuments =
 
     const response =
       await axios.get(
-        `${API}/my-documents`,
+        `${API}`,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+    return response.data;
+  };
+
+/*
+==================================================
+DELETE DOCUMENT
+==================================================
+*/
+
+export const deleteDocument =
+  async (documentId) => {
+
+    const token =
+      localStorage.getItem(
+        "token"
+      );
+
+    const response =
+      await axios.delete(
+        `${API}/${documentId}`,
         {
           headers: {
             Authorization:
