@@ -9,7 +9,6 @@ const MODEL =
 
 const chunkText =
   require("../utils/chunkText");
-
 /*
 ==================================================
 CREATE CONTEXT
