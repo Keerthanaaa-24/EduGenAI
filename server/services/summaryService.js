@@ -3,7 +3,6 @@ const client =
 
 const MODEL =
   require("../config/model");
-
 /*
 ==================================================
 GENERATE SUMMARY
