@@ -1,6 +1,5 @@
 const express = require("express");
 const auth = require("../middleware/auth");
-
 const Analytics = require("../models/Analytics");
 const QuizAttempt = require("../models/QuizAttempt");
 const Activity = require("../models/Activity");
