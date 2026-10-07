@@ -1,9 +1,12 @@
 import axios from "axios";
-const API =
-  "http://localhost:5000/api/quiz";
+const BASE_URL = (
+  import.meta.env.VITE_API_URL ||
+  "https://edugenai-8ix8.onrender.com"
+).replace(/\/+$/, "");
 
-const RESULT_API =
-  "http://localhost:5000/api/quiz-results";
+const API = `${BASE_URL}/api/quiz`;
+
+const RESULT_API = `${BASE_URL}/api/quiz-results`;
 
 /*
 Generate Quiz
