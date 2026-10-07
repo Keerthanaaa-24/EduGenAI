@@ -37,11 +37,13 @@ function Register() {
         "/login"
       );
     } catch (error) {
-      alert(
-        error.response?.data
-          ?.message ||
-          "Registration failed"
-      );
+      console.error("Registration error:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        (typeof error?.response?.data === "string" ? error.response.data : null) ||
+        error?.message ||
+        "Registration failed";
+      alert(errorMessage);
     }
   };
 

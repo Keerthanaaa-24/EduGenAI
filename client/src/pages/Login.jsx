@@ -56,13 +56,15 @@ function Login() {
         "/dashboard"
       );
     } catch (error) {
-      console.error(error);
+      console.error("Login error:", error);
 
-      alert(
-        error?.response?.data
-          ?.message ||
-          "Login Failed"
-      );
+      const errorMessage =
+        error?.response?.data?.message ||
+        (typeof error?.response?.data === "string" ? error.response.data : null) ||
+        error?.message ||
+        "Login Failed";
+
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
