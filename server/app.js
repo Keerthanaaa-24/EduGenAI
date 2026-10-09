@@ -14,7 +14,10 @@ const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
+// --------------------------------------------------
 // Allowed frontend origins
+// --------------------------------------------------
+
 const allowedOrigins = [
   "https://edu-gen-ai-six.vercel.app",
   "http://localhost:5173",
@@ -22,7 +25,7 @@ const allowedOrigins = [
   "http://localhost:5000",
 ];
 
-// Add production frontend URL from environment variables
+// Add frontend URLs configured in environment variables.
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(
     process.env.FRONTEND_URL.replace(/\/+$/, "")
@@ -35,22 +38,27 @@ if (process.env.CLIENT_URL) {
   );
 }
 
+// --------------------------------------------------
 // CORS configuration
+// --------------------------------------------------
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests without an Origin header
+    // Allow requests without an Origin header,
+    // such as server-to-server requests.
     if (!origin) {
       return callback(null, true);
     }
 
-    // Allow explicitly configured origins
+    // Allow explicitly configured frontend origins.
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    // Allow Vercel preview deployments for this project
+    // Allow Vercel preview deployments belonging
+    // to the configured Vercel account namespace.
     const isVercelPreview =
-      /^https:\/\/edu-gen-ai[a-z0-9-]*\.vercel\.app$/.test(
+      /^https:\/\/edu-gen-[a-z0-9-]+-keerthanamr1307-1357s-projects\.vercel\.app$/.test(
         origin
       );
 
@@ -58,7 +66,9 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    return callback(new Error("Not allowed by CORS"));
+    return callback(
+      new Error("Not allowed by CORS")
+    );
   },
 
   methods: [
@@ -82,12 +92,18 @@ const corsOptions = {
   credentials: false,
 };
 
+// --------------------------------------------------
 // Middleware
+// --------------------------------------------------
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Root health check
+// --------------------------------------------------
+// Root endpoint
+// --------------------------------------------------
+
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
@@ -95,7 +111,10 @@ app.get("/", (req, res) => {
   });
 });
 
+// --------------------------------------------------
 // Health endpoint
+// --------------------------------------------------
+
 app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
@@ -103,7 +122,10 @@ app.get("/health", (req, res) => {
   });
 });
 
+// --------------------------------------------------
 // API routes
+// --------------------------------------------------
+
 app.use("/api/auth", authRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/chat", chatRoutes);
@@ -113,7 +135,14 @@ app.use("/api/planner", plannerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/quiz-results", quizResultRoutes);
 
-// Error handler must be last
+// --------------------------------------------------
+// Error handler (must be last)
+// --------------------------------------------------
+
 app.use(errorHandler);
+
+// --------------------------------------------------
+// Export Express application
+// --------------------------------------------------
 
 module.exports = app;
