@@ -11,7 +11,9 @@ const errorHandler = (
     err.stack
   );
 
-  res.status(500).json({
+  const statusCode = err.message === "Not allowed by CORS" ? 403 : (res.statusCode !== 200 ? res.statusCode : 500);
+
+  res.status(statusCode).json({
     success: false,
     message:
       err.message ||
